@@ -9,8 +9,6 @@ import server_logic
 
 app = Flask(__name__)
 
-#hi
-
 
 @app.get("/")
 def handle_info():
