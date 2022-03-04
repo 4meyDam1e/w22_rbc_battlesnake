@@ -99,6 +99,39 @@ def find_closest_food(my_head: Dict[str, int], board_width: int, board_height: i
       closest_food = food
   return closest_food
 
+def is_safe(coords: List[Dict[str, int]], snakes:List[Dict[str, int]], my_health: int) -> bool:
+  for coord in coords:
+    for snake in snakes:
+      if (snake['body'][0]['x'] == (coord['x']) and snake['snake'][0]['y'] == (coord['y'])):
+        if (snake['health'] >= my_health):
+          return False
+  
+  return True
+
+def coords_around_move(move: str) -> List[Dict[str, int]]:
+  coords = []
+  if (move == "left"):
+    next_move = {'x':my_head['x'] - 1, 'y':my_head['y']}
+    coords.append({'x':next_move["x"] - 1, 'y':next_move["y"]}) #left
+    coords.append({'x':next_move["x"], 'y':next_move["y"] - 1}) #down
+    coords.append({'x':next_move["x"], 'y':next_move["y"] + 1}) #up
+  elif (move == "right"):
+    next_move = {'x':my_head['x'] + 1, 'y':my_head['y']}
+    coords.append({'x':next_move["x"] + 1, 'y':next_move["y"]}) #right
+    coords.append({'x':next_move["x"], 'y':next_move["y"] - 1}) #down
+    coords.append({'x':next_move["x"], 'y':next_move["y"] + 1}) #up
+  elif (move == "up"):
+    next_move = {'x':my_head['x'], 'y':my_head['y'] + 1}
+    coords.append({'x':next_move["x"] - 1, 'y':next_move["y"]}) #left
+    coords.append({'x':next_move["x"] + 1, 'y':next_move["y"]}) #right
+    coords.append({'x':next_move["x"], 'y':next_move["y"] + 1}) #up
+  elif (move == "down"):
+    next_move = {'x':my_head['x'], 'y':my_head['y'] - 1}
+    coords.append({'x':next_move["x"] - 1, 'y':next_move["y"]}) #left
+    coords.append({'x':next_move["x"] + 1, 'y':next_move["y"]}) #right
+    coords.append({'x':next_move["x"], 'y':next_move["y"] - 1}) #up
+  return coords
+  
 
 def choose_move(data: dict) -> str:
     """
@@ -145,6 +178,12 @@ def choose_move(data: dict) -> str:
     # Choose a random direction from the remaining possible_moves to move in, and then return that move
     #move = possible_moves[0]
     move = random.choice(possible_moves)
+
+    coords = coords_around_move(move)
+    print("COORDS AROUND MOVE: ")
+    print(coords)
+    print("SAFE: ")
+    print(is_safe(coords,data['board']['snakes'],data['you']['health']))
     # TODO: Explore new strategies for picking a move that are better than random
 
     print(f"{data['game']['id']} MOVE {data['turn']}: {move} picked from all valid options in {possible_moves}")
