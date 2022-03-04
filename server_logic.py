@@ -129,7 +129,7 @@ def choose_move(data: dict) -> str:
     # TODO: Using information from 'data', find the edges of the board and don't let your Battlesnake move beyond them
     board_width = data['board']['width']
     board_height = data['board']['height']
-    possible_moves = avoid_the_walls(my_head, board_height, board_width, possible_moves)
+    possible_moves = avoid_the_walls(my_head, board_width, board_height, possible_moves)
 
     # TODO Using information from 'data', don't let your Battlesnake pick a move that would hit its own body
     possible_moves = avoid_my_body(my_head, my_body, possible_moves)
@@ -138,7 +138,7 @@ def choose_move(data: dict) -> str:
     possible_moves = avoid_all_snakes(my_head, data['board']['snakes'], possible_moves)
 
     # TODO: Using information from 'data', make your Battlesnake move towards a piece of food on the board
-    closest_food = find_closest_food(my_head, data['board']['food'])
+    closest_food = find_closest_food(my_head, board_width, board_height, data['board']['food'])
     print("CLOSEST FOOD: " + closest_food)
 
     # Choose a random direction from the remaining possible_moves to move in, and then return that move
