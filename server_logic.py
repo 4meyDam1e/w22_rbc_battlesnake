@@ -139,7 +139,8 @@ def choose_move(data: dict) -> str:
 
     # TODO: Using information from 'data', make your Battlesnake move towards a piece of food on the board
     closest_food = find_closest_food(my_head, board_width, board_height, data['board']['food'])
-    print("CLOSEST FOOD: " + closest_food)
+    print("CLOSEST FOOD: ")
+    print(closest_food)
 
     # Choose a random direction from the remaining possible_moves to move in, and then return that move
     #move = possible_moves[0]
