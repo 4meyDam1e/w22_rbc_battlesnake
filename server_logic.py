@@ -93,7 +93,7 @@ def find_closest_food(my_head: Dict[str, int], board_width: int, board_height: i
   min_distance = board_width + board_height
   closest_food = {'x': 0, 'y': 0}
   for food in food_list:
-    curr_food_distance = (food['x'] - my_head['x']) + (food['y'] - my_head['y'])
+    curr_food_distance = abs(food['x'] - my_head['x']) + abs(food['y'] - my_head['y'])
     if curr_food_distance < min_distance:
       min_distance = curr_food_distance
       closest_food = food
