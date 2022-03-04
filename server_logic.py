@@ -100,7 +100,7 @@ def find_closest_food(my_head: Dict[str, int], board_width: int, board_height: i
   return closest_food
 
 
-def choose_move(data: dict, board_height: int, board_width: int) -> str:
+def choose_move(data: dict) -> str:
     """
     data: Dictionary of all Game Board data as received from the Battlesnake Engine.
     For a full example of 'data', see https://docs.battlesnake.com/references/api/sample-move-request
@@ -127,6 +127,8 @@ def choose_move(data: dict, board_height: int, board_width: int) -> str:
     possible_moves = avoid_my_neck(my_head, my_body, possible_moves)
 
     # TODO: Using information from 'data', find the edges of the board and don't let your Battlesnake move beyond them
+    board_width = data['board']['width']
+    board_height = data['board']['height']
     possible_moves = avoid_the_walls(my_head, board_height, board_width, possible_moves)
 
     # TODO Using information from 'data', don't let your Battlesnake pick a move that would hit its own body
