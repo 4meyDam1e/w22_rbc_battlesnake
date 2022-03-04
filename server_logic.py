@@ -33,8 +33,7 @@ def avoid_my_neck(my_head: Dict[str, int], my_body: List[dict], possible_moves: 
 
     return possible_moves
 
-def avoid_the_walls(my_head: dict, board_height: int, board_width: int, possible_moves: List[str]) -> List[str]:
-  
+def avoid_the_walls(my_head: dict, board_width: int, board_height: int, possible_moves: List[str]) -> List[str]:
   if my_head["x"] == 0:  # my head is at the left wall
       possible_moves.remove("left")
   elif my_head["x"] == board_width - 1:  # my head is at the right wall
@@ -47,7 +46,6 @@ def avoid_the_walls(my_head: dict, board_height: int, board_width: int, possible
   return possible_moves
 
 def avoid_my_body(my_head: Dict[str, int], my_body: List[dict], possible_moves: List[str]) -> List[str]:
-
   print("----------In body----------")
   print(my_body)
   for i in range(2, len(my_body)):
@@ -71,7 +69,6 @@ def avoid_my_body(my_head: Dict[str, int], my_body: List[dict], possible_moves: 
   return possible_moves
 
 def avoid_all_snakes(my_head: Dict[str, int], snakes: List[dict], possible_moves: List[str]) -> List[str]:
-
   for snake in snakes:
     for i in range(0, len(snake['body'])):
       if snake['body'][i]["x"] == my_head["x"] - 1 and snake['body'][i]["y"] == my_head["y"]:  # current body part is left of my head
