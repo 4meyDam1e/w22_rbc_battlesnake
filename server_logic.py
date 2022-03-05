@@ -100,6 +100,27 @@ def find_closest_food(my_head: Dict[str, int], board_width: int, board_height: i
       closest_food = food
   return closest_food
 
+def move_to_coord(possible_moves: List[str], my_head: Dict[str, int], coords: Dict[str, int]) -> str:
+  move = random.choice(possible_moves)
+
+  if my_head["x"] != coords["x"]:
+    if coords["x"] > my_head["x"]:
+      if "right" in possible_moves:
+        return "right"
+    else:
+      if "left" in possible_moves:
+        return "left"
+  
+  if my_head["y"] != coords["y"]: 
+    if coords["y"] > my_head["y"]:
+      if "up" in possible_moves:
+        return "up"
+    else:
+      if "down" in possible_moves:
+        return "down"
+  
+  return move
+
 def is_safe(coords: List[Dict[str, int]], snakes:List[Dict[str, int]], my_health: int) -> bool:
   for coord in coords:
     for snake in snakes:
