@@ -89,6 +89,7 @@ def avoid_all_snakes(my_head: Dict[str, int], snakes: List[dict], possible_moves
           print("Removed up")
   return possible_moves
 
+
 def find_closest_food(my_head: Dict[str, int], board_width: int, board_height: int, food_list: List[dict]) -> Dict[str, int]:
   min_distance = board_width + board_height
   closest_food = {'x': 0, 'y': 0}
@@ -132,6 +133,7 @@ def coords_around_move(move: str, my_head:Dict[str,int]) -> List[Dict[str, int]]
     coords.append({'x':next_move["x"], 'y':next_move["y"] - 1}) #up
   return coords
   
+
 
 def choose_move(data: dict) -> str:
     """
