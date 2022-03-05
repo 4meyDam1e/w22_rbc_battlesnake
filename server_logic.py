@@ -53,15 +53,15 @@ def avoid_my_body(my_head: Dict[str, int], my_body: List[dict], possible_moves: 
       if "left" in possible_moves:
         possible_moves.remove("left")
         print("Removed left")
-    elif my_body[i]["x"] == my_head["x"] + 1 and my_body[i]["y"] == my_head["y"]:  # current body part is right of my head
+    if my_body[i]["x"] == my_head["x"] + 1 and my_body[i]["y"] == my_head["y"]:  # current body part is right of my head
       if "right" in possible_moves:
         possible_moves.remove("right")
         print("Removed right")
-    elif my_body[i]["y"] == my_head["y"] - 1 and my_body[i]["x"] == my_head["x"]:  # current body part is below my head
+    if my_body[i]["y"] == my_head["y"] - 1 and my_body[i]["x"] == my_head["x"]:  # current body part is below my head
       if "down" in possible_moves:
         possible_moves.remove("down")
         print("Removed down")
-    elif my_body[i]["y"] == my_head["y"] + 1 and my_body[i]["x"] == my_head["x"]:  # current body part is above my head
+    if my_body[i]["y"] == my_head["y"] + 1 and my_body[i]["x"] == my_head["x"]:  # current body part is above my head
       if "up" in possible_moves:
         possible_moves.remove("up")
         print("Removed up")
@@ -75,15 +75,15 @@ def avoid_all_snakes(my_head: Dict[str, int], snakes: List[dict], possible_moves
         if "left" in possible_moves:
           possible_moves.remove("left")
           print("Removed left")
-      elif snake['body'][i]["x"] == my_head["x"] + 1 and snake['body'][i]["y"] == my_head["y"]:  # current body part is right of my head
+      if snake['body'][i]["x"] == my_head["x"] + 1 and snake['body'][i]["y"] == my_head["y"]:  # current body part is right of my head
         if "right" in possible_moves:
           possible_moves.remove("right")
           print("Removed right")
-      elif snake['body'][i]["y"] == my_head["y"] - 1 and snake['body'][i]["x"] == my_head["x"]:  # current body part is below my head
+      if snake['body'][i]["y"] == my_head["y"] - 1 and snake['body'][i]["x"] == my_head["x"]:  # current body part is below my head
         if "down" in possible_moves:
           possible_moves.remove("down")
           print("Removed down")
-      elif snake['body'][i]["y"] == my_head["y"] + 1 and snake['body'][i]["x"] == my_head["x"]:  # current body part is above my head
+      if snake['body'][i]["y"] == my_head["y"] + 1 and snake['body'][i]["x"] == my_head["x"]:  # current body part is above my head
         if "up" in possible_moves:
           possible_moves.remove("up")
           print("Removed up")
@@ -102,13 +102,13 @@ def find_closest_food(my_head: Dict[str, int], board_width: int, board_height: i
 def is_safe(coords: List[Dict[str, int]], snakes:List[Dict[str, int]], my_health: int) -> bool:
   for coord in coords:
     for snake in snakes:
-      if (snake['body'][0]['x'] == (coord['x']) and snake['snake'][0]['y'] == (coord['y'])):
+      if (snake['body'][0]['x'] == (coord['x']) and snake['body'][0]['y'] == (coord['y'])):
         if (snake['health'] >= my_health):
           return False
   
   return True
 
-def coords_around_move(move: str) -> List[Dict[str, int]]:
+def coords_around_move(move: str, my_head:Dict[str,int]) -> List[Dict[str, int]]:
   coords = []
   if (move == "left"):
     next_move = {'x':my_head['x'] - 1, 'y':my_head['y']}
@@ -179,7 +179,7 @@ def choose_move(data: dict) -> str:
     #move = possible_moves[0]
     move = random.choice(possible_moves)
 
-    coords = coords_around_move(move)
+    coords = coords_around_move(move,my_head)
     print("COORDS AROUND MOVE: ")
     print(coords)
     print("SAFE: ")
