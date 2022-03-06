@@ -234,7 +234,7 @@ def choose_move(data: dict) -> str:
     if data["you"]["health"] < 50 or my_length < 10:
       move = move_to_coord(possible_moves, my_head, closest_food)
     else:
-      move = move_to_coord(possible_moves, my_head, my_body[-1])
+      move = random.choice(possible_moves)
     print("POTENTIAL MOVE: " + move)
 
     risky_moves = []
@@ -245,7 +245,7 @@ def choose_move(data: dict) -> str:
       if data["you"]["health"] < 50 or my_length < 10:
         move = move_to_coord(possible_moves, my_head, closest_food)
       else:
-        move = move_to_coord(possible_moves, my_head, my_body[-1])
+        move = random.choice(possible_moves)
       print("POTENTIAL MOVE: " + move)
   
     #coords = coords_around_move(move, my_head)
