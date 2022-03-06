@@ -144,15 +144,15 @@ def move_to_coord(possible_moves: List[str], my_head: Dict[str, int],
     return move
 
 
-def is_safe(coords: List[Dict[str, int]], snakes: List[Dict[str, int]],
-            my_health: int) -> bool:
+def is_safe(coords: List[Dict[str, int]], snakes: List[Dict[str, int]], my_length: int) -> bool:
     for coord in coords:
         for snake in snakes:
             if (snake['body'][0]['x'] == (coord['x'])
                     and snake['body'][0]['y'] == (coord['y'])):
-                if (snake['health'] >= my_health):
+                if (len(snake["body"]) >= my_length):
+                    print("SAFE: FALSE")
                     return False
-
+    print("SAFE: TRUE")
     return True
 
 
@@ -198,6 +198,7 @@ def choose_move(data: dict) -> str:
         "head"]  # A dictionary of x/y coordinates like {"x": 0, "y": 0}
     my_body = data["you"][
         "body"]  # A list of x/y coordinate dictionaries like [ {"x": 0, "y": 0}, {"x": 1, "y": 0}, {"x": 2, "y": 0} ]
+    my_length = len(my_body)
 
     # TODO: uncomment the lines below so you can see what this data looks like in your output!
     # print(f"~~~ Turn: {data['turn']}  Game Mode: {data['game']['ruleset']['name']} ~~~")
@@ -230,19 +231,30 @@ def choose_move(data: dict) -> str:
     print(closest_food)
 
     # CHASING TAIL
-    if data["you"]["health"] < 50 or len(my_body) < 5:
+    if data["you"]["health"] < 50 or my_length < 10:
       move = move_to_coord(possible_moves, my_head, closest_food)
     else:
       move = move_to_coord(possible_moves, my_head, my_body[-1])
+    print("POTENTIAL MOVE: " + move)
 
-    
-    coords = coords_around_move(move, my_head)
-    print("COORDS AROUND MOVE: ")
-    print(coords)
-    print("SAFE: ")
-    print(is_safe(coords, data['board']['snakes'], data['you']['health']))
+    risky_moves = []
+    while (len(possible_moves) > 0) and (not is_safe(coords_around_move(move, my_head), data['board']['snakes'], my_length)):
+      # CHASING TAIL
+      risky_moves.append(move)
+      possible_moves.remove(move)
+      if data["you"]["health"] < 50 or my_length < 10:
+        move = move_to_coord(possible_moves, my_head, closest_food)
+      else:
+        move = move_to_coord(possible_moves, my_head, my_body[-1])
+      print("POTENTIAL MOVE: " + move)
+  
+    #coords = coords_around_move(move, my_head)
+    #print("COORDS AROUND MOVE: ")
+    #print(coords)
     # TODO: Explore new strategies for picking a move that are better than random
-
+    if len(possible_moves) == 0:
+      move = random.choice(risky_moves)
+    
     print(
         f"{data['game']['id']} MOVE {data['turn']}: {move} picked from all valid options in {possible_moves}"
     )
