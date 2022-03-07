@@ -82,17 +82,6 @@ def move_to_coord(possible_moves: List[str], my_head: Dict[str, int], coord: Dic
   return move
 
 
-def kill_safe(coords: List[Dict[str, int]], snakes: List[Dict[str, int]], my_length: int) -> bool:
-  for coord in coords:
-    for snake in snakes:
-      if snake["body"][0] == coord:#(snake["body"][0]["x"] == (coord["x"]) and snake["body"][0]["y"] == (coord["y"])):
-        if (len(snake["body"]) >= my_length):
-          # print("SAFE: FALSE")
-          return False
-  # print("SAFE: TRUE")
-  return True
-
-
 def coords_around_move(move: str, my_head: Dict[str, int]) -> List[Dict[str, int]]:
   coords = []
   if move == "left":
@@ -117,6 +106,54 @@ def coords_around_move(move: str, my_head: Dict[str, int]) -> List[Dict[str, int
     coords.append({"x": next_coord["x"] + 1, "y": next_coord["y"]})  #right
   return coords
 
+
+def kill_safe(coords: List[Dict[str, int]], snakes: List[Dict[str, int]], my_length: int) -> bool:
+  for coord in coords:
+    for snake in snakes:
+      if snake["body"][0] == coord:#(snake["body"][0]["x"] == (coord["x"]) and snake["body"][0]["y"] == (coord["y"])):
+        if (len(snake["body"]) >= my_length):
+          # print("SAFE: FALSE")
+          return False
+  # print("SAFE: TRUE")
+  return True
+
+
+def flood_fill(x: int, y: int, visited: List[str], count: int, board_width: int, board_height: int, snakes: List[dict]) -> int:
+  coord = "(" + str(x) + ", " + str(y) + ")"
+  print("COORDINATE: " + coord)
+  if ((coord in visited) or  # coordinate already visited
+      (x < 0) or  # coordinate out of bounds to the left
+      (y < 0) or  # coordinate out of bounds below
+      (x >= board_width) or  # coordinate out of bounds to the right
+      (y >= board_height) or  # coordinate out of bounds above
+      (is_in_snake({"x": x, "y": y}, snakes))):  # coordinate is on a snake
+    print("RETURNING 0")
+    return 0
+
+  visited.append(coord)
+  print("VISITED AFTER ADDING: " + visited)
+  count_up = flood_fill(x, y + 1, visited, count, board_width, board_height, snakes)
+  count_left = flood_fill(x - 1, y, visited, count, board_width, board_height, snakes)
+  count_down = flood_fill(x, y - 1, visited, count, board_width, board_height, snakes)
+  count_right = flood_fill(x + 1, y, visited, count, board_width, board_height, snakes)
+  print("RETURNING " + count_up + count_left + count_down + count_right + 1)
+  return count_up + count_left + count_down + count_right + 1
+
+
+def block_safe(move: str, my_head: str, my_length: str, board_width: int, board_height: int, snakes: List[dict]) -> boolean:
+  if move == "up":
+    x = my_head["x"]
+    y = my_head["y"] + 1
+  elif move == "left":
+    x = my_head["x"] - 1
+    y = my_head["y"]
+  elif move == "down":
+    x = my_head["x"]
+    y = my_head["y"] - 1
+  elif move == "right":
+    x = my_head["x"] + 1
+    y = my_head["y"]
+  return flood_fill(x, y, [], 0, board_width, board_height, snakes) >= my_length
 
 """def block_safe(coords: List[Dict[str, int]], board_length: int, board_width: int, snakes: List[Dict[str, int]]) -> bool:
     left_of_move = True
@@ -162,13 +199,6 @@ def blocked_coords(move: str, my_head: Dict[str, int]) -> List[Dict[str, int]]:
     return coords"""
 
 
-def flood_fill(x: int, y: int, visited: List[str], count: int, board_width: int, board_height: int, snakes: List[dict]) -> int:
-  coord = "(" + str(x) + ", " + str(y) + ")"
-  if (coord in visited) or (x >= board_width) or (y >= board_height) or (is_in_snake({"x": x, "y": y}, snakes) ):
-    return 0
-  return
-
-
 def choose_move(data: dict) -> str:
   """
   data: Dictionary of all Game Board data as received from the Battlesnake Engine.
@@ -208,12 +238,10 @@ def choose_move(data: dict) -> str:
   #possible_moves = avoid_my_body(my_head, my_body, possible_moves)
 
   # TODO: Using information from "data", don"t let your Battlesnake pick a move that would collide with another Battlesnake
-  possible_moves = avoid_all_snakes(my_head, data["board"]["snakes"],
-                                    possible_moves)
+  possible_moves = avoid_all_snakes(my_head, data["board"]["snakes"], possible_moves)
 
   # TODO: Using information from "data", make your Battlesnake move towards a piece of food on the board
-  closest_food = find_closest_food(my_head, board_width, board_height,
-                                    data["board"]["food"])
+  closest_food = find_closest_food(my_head, board_width, board_height, data["board"]["food"])
   # print("CLOSEST FOOD: ")
   # print(closest_food)
 
@@ -221,15 +249,16 @@ def choose_move(data: dict) -> str:
   if data["you"]["health"] < 50 or my_length < 10:
     move = move_to_coord(possible_moves, my_head, closest_food)
   else:
-    move = random.choice(possible_moves)
+    move = move_to_coord(possible_moves, my_head, my_body[-1]) 
+    # move = random.choice(possible_moves)
   # print("POTENTIAL MOVE: " + move)
 
   risky_kill_moves = []
   risky_block_moves = []
-  # print("Initial Move: " + move)
-  # while not is_safe2(blocked_coords(move, my_head), board_height, board_width, my_body):
-  """safe_from_kill = kill_safe(coords_around_move(move, my_head), data["board"]["snakes"], my_length)
-  safe_from_block = block_safe(blocked_coords(move, my_head), board_height, board_width, data["board"]["snakes"])
+
+  safe_from_kill = kill_safe(coords_around_move(move, my_head), data["board"]["snakes"], my_length)
+  #safe_from_block = block_safe(blocked_coords(move, my_head), board_height, board_width, data["board"]["snakes"])
+  safe_from_block = block_safe(move)
 
   while not safe_from_block or not safe_from_kill:
     # CHASING TAIL
@@ -255,7 +284,7 @@ def choose_move(data: dict) -> str:
     # print("POTENTIAL MOVE: " + move)
 
     safe_from_kill = kill_safe(coords_around_move(move, my_head), data["board"]["snakes"], my_length)
-    safe_from_block = block_safe(blocked_coords(move, my_head), board_height, board_width, data["board"]["snakes"])"""
+    safe_from_block = block_safe(move, my_head, my_length, board_width, board_height, data["board"]["snakes"])
 
   #coords = coords_around_move(move, my_head)
   #print("COORDS AROUND MOVE: ")
