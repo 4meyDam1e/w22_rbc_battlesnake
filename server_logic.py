@@ -179,30 +179,6 @@ def kill_safe(coords: List[Dict[str, int]], snakes: List[Dict[str, int]],
 #     print(f"RIGHT OF MOVE: {right_of_move}")
 #     return left_of_move or right_of_move
 
-def block_safe(coords: List[Dict[str, int]], board_length: int, board_width: int, snakes: List[Dict[str, int]]) -> bool:
-    left_of_move = True
-    right_of_move = True
-    #checks walls
-    if (coords[0]["x"] < 0 or coords[0]["x"] > (board_length - 1)
-            or coords[0]["y"] < 0 or coords[0]["y"] > (board_width - 1)):
-        left_of_move = False
-        
-
-    if (coords[1]["x"] < 1 or coords[1]["x"] > (board_length - 1)
-            or coords[1]["y"] < 0 or coords[1]["y"] > (board_width - 1)):
-        right_of_move = False
-
-    for snake in snakes:
-        for i in snake["body"]:
-            if coords[0]["x"] == i["x"] and coords[0]["y"] == i["y"]:
-                left_of_move = False
-            if coords[1]["x"] == i["x"] and coords[1]["y"] == i["y"]:
-                right_of_move = False
-
-    # print(f"LEFT OF MOVE: {left_of_move}")
-    # print(f"RIGHT OF MOVE: {right_of_move}")
-    return left_of_move or right_of_move
-
 
 def coords_around_move(move: str, my_head: Dict[str,
                                                 int]) -> List[Dict[str, int]]:
@@ -229,6 +205,30 @@ def coords_around_move(move: str, my_head: Dict[str,
         coords.append({'x': next_move["x"], 'y': next_move["y"] - 1})  #up
 
     return coords
+
+def block_safe(coords: List[Dict[str, int]], board_length: int, board_width: int, snakes: List[Dict[str, int]]) -> bool:
+    left_of_move = True
+    right_of_move = True
+    #checks walls
+    if (coords[0]["x"] < 0 or coords[0]["x"] > (board_length - 1)
+            or coords[0]["y"] < 0 or coords[0]["y"] > (board_width - 1)):
+        left_of_move = False
+        
+
+    if (coords[1]["x"] < 1 or coords[1]["x"] > (board_length - 1)
+            or coords[1]["y"] < 0 or coords[1]["y"] > (board_width - 1)):
+        right_of_move = False
+
+    for snake in snakes:
+        for i in snake["body"]:
+            if coords[0]["x"] == i["x"] and coords[0]["y"] == i["y"]:
+                left_of_move = False
+            if coords[1]["x"] == i["x"] and coords[1]["y"] == i["y"]:
+                right_of_move = False
+
+    # print(f"LEFT OF MOVE: {left_of_move}")
+    # print(f"RIGHT OF MOVE: {right_of_move}")
+    return left_of_move or right_of_move
 
 
 def blocked_coords(move: str, my_head: Dict[str, int]) -> List[Dict[str, int]]:
