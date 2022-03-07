@@ -258,33 +258,27 @@ def choose_move(data: dict) -> str:
 
   safe_from_kill = kill_safe(coords_around_move(move, my_head), data["board"]["snakes"], my_length)
   #safe_from_block = block_safe(blocked_coords(move, my_head), board_height, board_width, data["board"]["snakes"])
-  safe_from_block = block_safe(move)
+  safe_from_block = block_safe(move, my_head, my_length, board_width, board_height, data["board"]["snakes"])
 
-  while not safe_from_block or not safe_from_kill:
-    # CHASING TAIL
+  while (len(possible_moves) > 0) and ((not safe_from_block) or (not safe_from_kill)):
     # print(f"BLOCK_SAFE: {safe_from_block} KILL_SAFE: {safe_from_kill}")
     if not safe_from_block:
       risky_block_moves.append(move)
     if not safe_from_kill:
       risky_kill_moves.append(move)
     possible_moves.remove(move)
-    
-    if len(possible_moves) == 0:
-      if len(risky_kill_moves) == 0:
-        move = random.choice(risky_block_moves)
-        break
-      else:
-        move = random.choice(risky_kill_moves)
-        break
-    
-    if data["you"]["health"] < 50 or my_length < 10:
+    # CHASING TAIL
+    if data["you"]["health"] < 50:
       move = move_to_coord(possible_moves, my_head, closest_food)
     else:
-      move = random.choice(possible_moves)
-    # print("POTENTIAL MOVE: " + move)
-
-    safe_from_kill = kill_safe(coords_around_move(move, my_head), data["board"]["snakes"], my_length)
-    safe_from_block = block_safe(move, my_head, my_length, board_width, board_height, data["board"]["snakes"])
+      move = move_to_coord(possible_moves, my_head, my_body[-1]) 
+      # move = random.choice(possible_moves)
+    
+  if len(risky_kill_moves) == 0:
+    move = random.choice(risky_block_moves)
+  else:
+    move = random.choice(risky_kill_moves)
+    
 
   #coords = coords_around_move(move, my_head)
   #print("COORDS AROUND MOVE: ")
