@@ -9,32 +9,6 @@ from the list of possible moves!
 """
 
 
-def avoid_my_neck(my_head: Dict[str, int], my_body: List[dict], possible_moves: List[str]) -> List[str]:
-    """
-    my_head: Dictionary of x/y coordinates of the Battlesnake head.
-            e.g. {"x": 0, "y": 0}
-    my_body: List of dictionaries of x/y coordinates for every segment of a Battlesnake.
-            e.g. [ {"x": 0, "y": 0}, {"x": 1, "y": 0}, {"x": 2, "y": 0} ]
-    possible_moves: List of strings. Moves to pick from.
-            e.g. ["up", "down", "left", "right"]
-
-    return: The list of remaining possible_moves, with the "neck" direction removed
-    """
-    my_neck = my_body[
-        1]  # The segment of body right after the head is the "neck"
-
-    if my_neck["x"] < my_head["x"]:  # my neck is left of my head
-        possible_moves.remove("left")
-    elif my_neck["x"] > my_head["x"]:  # my neck is right of my head
-        possible_moves.remove("right")
-    elif my_neck["y"] < my_head["y"]:  # my neck is below my head
-        possible_moves.remove("down")
-    elif my_neck["y"] > my_head["y"]:  # my neck is above my head
-        possible_moves.remove("up")
-
-    return possible_moves
-
-
 def avoid_the_walls(my_head: dict, board_width: int, board_height: int, possible_moves: List[str]) -> List[str]:
     if my_head["x"] == 0:  # my head is at the left wall
         possible_moves.remove("left")
@@ -48,33 +22,6 @@ def avoid_the_walls(my_head: dict, board_width: int, board_height: int, possible
     return possible_moves
 
 
-def avoid_my_body(my_head: Dict[str, int], my_body: List[dict], possible_moves: List[str]) -> List[str]:
-    # print("----------In body----------")
-    # print(my_body)
-    for i in range(2, len(my_body)):
-        if my_body[i]["x"] == my_head["x"] - 1 and my_body[i]["y"] == my_head[
-                "y"]:  # current body part is left of my head
-            if "left" in possible_moves:
-                possible_moves.remove("left")
-                # print("Removed left")
-        if my_body[i]["x"] == my_head["x"] + 1 and my_body[i]["y"] == my_head[
-                "y"]:  # current body part is right of my head
-            if "right" in possible_moves:
-                possible_moves.remove("right")
-                # print("Removed right")
-        if my_body[i]["y"] == my_head["y"] - 1 and my_body[i]["x"] == my_head[
-                "x"]:  # current body part is below my head
-            if "down" in possible_moves:
-                possible_moves.remove("down")
-                # print("Removed down")
-        if my_body[i]["y"] == my_head["y"] + 1 and my_body[i]["x"] == my_head[
-                "x"]:  # current body part is above my head
-            if "up" in possible_moves:
-                possible_moves.remove("up")
-                # print("Removed up")
-    # print("----------")
-    return possible_moves
-
 def is_in_snake(coord: Dict[str, int], snakes: List[dict]) -> boolean:
     for snake in snakes:
         for i in range(len(snake["body"])):
@@ -83,37 +30,24 @@ def is_in_snake(coord: Dict[str, int], snakes: List[dict]) -> boolean:
     return False
 
 def avoid_all_snakes(my_head: Dict[str, int], snakes: List[dict], possible_moves: List[str]) -> List[str]:
-    """ for snake in snakes:
-        for i in range(0, len(snake["body"])):
-            if snake["body"][i]["x"] == my_head["x"] - 1 and snake["body"][i]["y"] == my_head["y"]:  # current body part is left of my head
-                if "left" in possible_moves:
-                    possible_moves.remove("left")
-                    # print("Removed left")
-            if snake["body"][i]["x"] == my_head["x"] + 1 and snake["body"][i]["y"] == my_head["y"]:  # current body part is right of my head
-                if "right" in possible_moves:
-                    possible_moves.remove("right")
-                    # print("Removed right")
-            if snake["body"][i]["y"] == my_head["y"] - 1 and snake["body"][i]["x"] == my_head["x"]:  # current body part is below my head
-                if "down" in possible_moves:
-                    possible_moves.remove("down")
-                    # print("Removed down")
-            if snake["body"][i]["y"] == my_head["y"] + 1 and snake["body"][i]["x"] == my_head["x"]:  # current body part is above my head
-                if "up" in possible_moves:
-                    possible_moves.remove("up")
-                    # print("Removed up") """
-    if is_in_snake({"x": my_head["x"], "y": my_head["y"] + 1}): # above my head
-        if "left" in possible_moves:
+    print("-----------------------\nIn avoid_all_snakes()")
+    if is_in_snake({"x": my_head["x"], "y": my_head["y"] + 1}, snakes): # above my head
+        if "up" in possible_moves:
+            print("REMOVING UP")
             possible_moves.remove("up")
-    if is_in_snake({"x": my_head["x"] - 1, "y": my_head["y"]}): # left of my head
+    if is_in_snake({"x": my_head["x"] - 1, "y": my_head["y"]}, snakes): # left of my head
         if "left" in possible_moves:
+            print("REMOVING LEFT")
             possible_moves.remove("left")
-    if is_in_snake({"x": my_head["x"], "y": my_head["y"] + 1}): # below my head
-        if "left" in possible_moves:
+    if is_in_snake({"x": my_head["x"], "y": my_head["y"] - 1}, snakes): # below my head
+        if "down" in possible_moves:
+            print("REMOVING DOWN")
             possible_moves.remove("down")
-    if is_in_snake({"x": my_head["x"] + 1, "y": my_head["y"]}): # right of my head
-        if "left" in possible_moves:
+    if is_in_snake({"x": my_head["x"] + 1, "y": my_head["y"]}, snakes): # right of my head
+        if "right" in possible_moves:
+            print("REMOVING RIGHT")
             possible_moves.remove("right")
-
+    print("------------------")
     return possible_moves
 
 
@@ -258,13 +192,13 @@ def choose_move(data: dict) -> str:
     # TODO: uncomment the lines below so you can see what this data looks like in your output!
     # print(f"~~~ Turn: {data["turn"]}  Game Mode: {data["game"]["ruleset"]["name"]} ~~~")
     # print(f"All board data this turn: {data}")
-    # print(f"My Battlesnakes head this turn is: {my_head}")
+    print(f"My Battlesnakes head this turn is: {my_head}")
     # print(f"My Battlesnakes body this turn is: {my_body}")
 
     possible_moves = ["up", "down", "left", "right"]
 
     # Don"t allow your Battlesnake to move back in on it"s own neck
-    possible_moves = avoid_my_neck(my_head, my_body, possible_moves)
+    #possible_moves = avoid_my_neck(my_head, my_body, possible_moves)
 
     # TODO: Using information from "data", find the edges of the board and don"t let your Battlesnake move beyond them
     board_width = data["board"]["width"]
@@ -273,7 +207,7 @@ def choose_move(data: dict) -> str:
                                      possible_moves)
 
     # TODO Using information from "data", don"t let your Battlesnake pick a move that would hit its own body
-    possible_moves = avoid_my_body(my_head, my_body, possible_moves)
+    #possible_moves = avoid_my_body(my_head, my_body, possible_moves)
 
     # TODO: Using information from "data", don"t let your Battlesnake pick a move that would collide with another Battlesnake
     possible_moves = avoid_all_snakes(my_head, data["board"]["snakes"],
