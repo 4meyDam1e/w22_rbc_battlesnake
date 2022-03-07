@@ -185,7 +185,7 @@ def coords_around_move(move: str, my_head: Dict[str, int]) -> List[Dict[str, int
 
     return coords
 
- def block_safe(coords: List[Dict[str, int]], board_length: int, board_width: int, snakes: List[Dict[str, int]]) -> bool:
+def block_safe(coords: List[Dict[str, int]], board_length: int, board_width: int, snakes: List[Dict[str, int]]) -> bool:
     left_of_move = True
     right_of_move = True
     #checks walls
