@@ -120,27 +120,27 @@ def kill_safe(coords: List[Dict[str, int]], snakes: List[Dict[str, int]], my_len
 
 def flood_fill(x: int, y: int, visited: List[str], count: int, board_width: int, board_height: int, snakes: List[dict]) -> int:
   coord = "(" + str(x) + ", " + str(y) + ")"
-  print("COORDINATE: " + coord)
+  #print("COORDINATE: " + coord)
   if ((coord in visited) or  # coordinate already visited
       (x < 0) or  # coordinate out of bounds to the left
       (y < 0) or  # coordinate out of bounds below
       (x >= board_width) or  # coordinate out of bounds to the right
       (y >= board_height) or  # coordinate out of bounds above
       (is_in_snake({"x": x, "y": y}, snakes))):  # coordinate is on a snake
-    print("RETURNING 0")
+    #print("RETURNING 0")
     return 0
 
   visited.append(coord)
-  print("VISITED AFTER ADDING: " + visited)
+  #print("VISITED AFTER ADDING: ", end = "")
+  #print(visited)
   count_up = flood_fill(x, y + 1, visited, count, board_width, board_height, snakes)
   count_left = flood_fill(x - 1, y, visited, count, board_width, board_height, snakes)
   count_down = flood_fill(x, y - 1, visited, count, board_width, board_height, snakes)
   count_right = flood_fill(x + 1, y, visited, count, board_width, board_height, snakes)
-  print("RETURNING " + count_up + count_left + count_down + count_right + 1)
   return count_up + count_left + count_down + count_right + 1
 
 
-def block_safe(move: str, my_head: str, my_length: str, board_width: int, board_height: int, snakes: List[dict]) -> boolean:
+def get_flood_fill_value(move: str, my_head: str, board_width: int, board_height: int, snakes: List[dict]) -> int:
   if move == "up":
     x = my_head["x"]
     y = my_head["y"] + 1
@@ -153,7 +153,8 @@ def block_safe(move: str, my_head: str, my_length: str, board_width: int, board_
   elif move == "right":
     x = my_head["x"] + 1
     y = my_head["y"]
-  return flood_fill(x, y, [], 0, board_width, board_height, snakes) >= my_length
+  
+  return flood_fill(x, y, [], 0, board_width, board_height, snakes)
 
 """def block_safe(coords: List[Dict[str, int]], board_length: int, board_width: int, snakes: List[Dict[str, int]]) -> bool:
     left_of_move = True
@@ -220,6 +221,7 @@ def choose_move(data: dict) -> str:
   # TODO: uncomment the lines below so you can see what this data looks like in your output!
   # print(f"~~~ Turn: {data["turn"]}  Game Mode: {data["game"]["ruleset"]["name"]} ~~~")
   # print(f"All board data this turn: {data}")
+  print("----------------------")
   print(f"My Battlesnakes head this turn is: {my_head}")
   # print(f"My Battlesnakes body this turn is: {my_body}")
 
@@ -251,33 +253,43 @@ def choose_move(data: dict) -> str:
   else:
     move = move_to_coord(possible_moves, my_head, my_body[-1]) 
     # move = random.choice(possible_moves)
-  # print("POTENTIAL MOVE: " + move)
-
+  print("CURRENT CHOSEN MOVE:" + move)
+  
   risky_kill_moves = []
-  risky_block_moves = []
-
   safe_from_kill = kill_safe(coords_around_move(move, my_head), data["board"]["snakes"], my_length)
-  #safe_from_block = block_safe(blocked_coords(move, my_head), board_height, board_width, data["board"]["snakes"])
-  safe_from_block = block_safe(move, my_head, my_length, board_width, board_height, data["board"]["snakes"])
+  risky_block_moves_to_ff_value = {}
+  ff_value = get_flood_fill_value(move, my_head, board_width, board_height, data["board"]["snakes"])
+  print("FLOOD FILL VALUE: ", end = "")
+  print(ff_value)
+  safe_from_block = ff_value >= my_length
 
-  while (len(possible_moves) > 0) and ((not safe_from_block) or (not safe_from_kill)):
+  while (not safe_from_block) or (not safe_from_kill):
     # print(f"BLOCK_SAFE: {safe_from_block} KILL_SAFE: {safe_from_kill}")
     if not safe_from_block:
-      risky_block_moves.append(move)
+      risky_block_moves_to_ff_value[move] = ff_value
     if not safe_from_kill:
       risky_kill_moves.append(move)
     possible_moves.remove(move)
+
+    if len(possible_moves) == 0:
+      if len(risky_kill_moves) == 0:
+        move = max(risky_block_moves_to_ff_value, key = risky_block_moves_to_ff_value.get)
+      else:
+        move = random.choice(risky_kill_moves)
+      break
+        
     # CHASING TAIL
-    if data["you"]["health"] < 50:
+    if data["you"]["health"] < 50 or my_length < 10:
       move = move_to_coord(possible_moves, my_head, closest_food)
     else:
       move = move_to_coord(possible_moves, my_head, my_body[-1]) 
       # move = random.choice(possible_moves)
-    
-  if len(risky_kill_moves) == 0:
-    move = random.choice(risky_block_moves)
-  else:
-    move = random.choice(risky_kill_moves)
+    print("CURRENT CHOSEN MOVE:" + move)
+    safe_from_kill = kill_safe(coords_around_move(move, my_head), data["board"]["snakes"], my_length)
+    ff_value = get_flood_fill_value(move, my_head, board_width, board_height, data["board"]["snakes"])
+    print("FLOOD FILL VALUE: ", end = "")
+    print(ff_value)
+    safe_from_block = ff_value >= my_length
     
 
   #coords = coords_around_move(move, my_head)
@@ -291,5 +303,6 @@ def choose_move(data: dict) -> str:
   # print(
   #     f"{data["game"]["id"]} MOVE {data["turn"]}: {move} picked from all valid options in {possible_moves}"
   # )
-
+  print("FINAL CHOSEN MOVE:" + move)
+  print("----------------------")
   return move
