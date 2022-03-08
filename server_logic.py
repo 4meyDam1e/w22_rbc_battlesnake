@@ -252,6 +252,16 @@ def blocked_coords(move: str, my_head: Dict[str, int]) -> List[Dict[str, int]]:
         coords.append({'x': next_move["x"] + 1, 'y': next_move["y"]})  #right
     return coords
 
+def prioritize_kill(possible_moves: List[str], snakes: List[Dict[str, int]],my_head:Dict[str, int], my_length:int) -> str:
+    for move in possible_moves:
+        coords = coords_around_move(move, my_head)
+        for coord in coords:
+            for snake in snakes:
+                if (snake['body'][0]['x'] == (coord['x'])
+                        and snake['body'][0]['y'] == (coord['y'])):
+                    if (len(snake["body"]) < my_length):
+                        return move
+    return ""
 
 def choose_move(data: dict) -> str:
     """
@@ -302,10 +312,12 @@ def choose_move(data: dict) -> str:
     # print(closest_food)
 
     # CHASING TAIL
-    if data["you"]["health"] < 50 or my_length < 10:
-        move = move_to_coord(possible_moves, my_head, closest_food)
-    else:
-        move = random.choice(possible_moves)
+    move = prioritize_kill(possible_moves,data['board']['snakes'],my_head,my_length)
+    if move == "":
+        if data["you"]["health"] < 50 or my_length < 10:
+            move = move_to_coord(possible_moves, my_head, closest_food)
+        else:
+            move = random.choice(possible_moves)
     # print("POTENTIAL MOVE: " + move)
 
     risky_kill_moves = []
@@ -332,10 +344,12 @@ def choose_move(data: dict) -> str:
             move = random.choice(risky_kill_moves)
             break
         
-        if data["you"]["health"] < 50 or my_length < 10:
-            move = move_to_coord(possible_moves, my_head, closest_food)
-        else:
-            move = random.choice(possible_moves)
+        move = prioritize_kill(possible_moves,data['board']['snakes'],my_head,my_length)
+        if move == "":
+            if data["you"]["health"] < 50 or my_length < 10:
+                move = move_to_coord(possible_moves, my_head, closest_food)
+            else:
+                move = random.choice(possible_moves)
         # print("POTENTIAL MOVE: " + move)
 
         safe_from_kill = kill_safe(coords_around_move(move, my_head), data['board']['snakes'], my_length)
