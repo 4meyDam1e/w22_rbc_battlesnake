@@ -169,6 +169,18 @@ def get_largest_snake_length(snakes: List[dict], my_id: str):
   return max_length
 
 
+def prioritize_kill(possible_moves: List[str], snakes: List[dict],my_head:Dict[str, int], my_length:int) -> List[str]:
+  kill_moves= []
+  for move in possible_moves:
+    coords = coords_around_move(move, my_head)
+    for coord in coords:
+      for snake in snakes:
+        if (snake['body'][0]['x'] == (coord['x']) and snake['body'][0]['y'] == (coord['y'])):
+          if (snake["length"] < my_length):
+            kill_moves.append(move)
+  return kill_moves
+
+
 def choose_move(data: dict) -> str:
   my_head = data["you"][
     "head"]  # A dictionary of x/y coordinates like {"x": 0, "y": 0}
@@ -209,13 +221,17 @@ def choose_move(data: dict) -> str:
   # print("CLOSEST FOOD: ")
   # print(closest_food)
   
-  # CHASING TAIL
-  if my_health < 50 or my_length <= get_largest_snake_length(snakes, my_id):
-    move = move_to_coord(possible_moves, my_head, closest_food)
+  kill_moves = prioritize_kill(possible_moves, snakes, my_head, my_length)
+  if len(kill_moves) > 0:
+    move = random.choice(kill_moves)
   else:
-    move = move_to_coord(possible_moves, my_head, my_body[-1]) 
-    # move = random.choice(possible_moves)
-  print("CURRENT CHOSEN MOVE:" + move)
+    # CHASING TAIL
+    if my_health < 50 or my_length <= get_largest_snake_length(snakes, my_id):
+      move = move_to_coord(possible_moves, my_head, closest_food)
+    else:
+      move = move_to_coord(possible_moves, my_head, my_body[-1]) 
+      # move = random.choice(possible_moves)
+    print("CURRENT CHOSEN MOVE:" + move)
 
   risky_kill_moves = []
   safe_from_kill = kill_safe(coords_around_move(move, my_head), snakes, my_length)
@@ -232,6 +248,8 @@ def choose_move(data: dict) -> str:
     if not safe_from_kill:
       risky_kill_moves.append(move)
     possible_moves.remove(move)
+    if move in kill_moves:
+      kill_moves.remove(move)
 
     if len(possible_moves) == 0:
       if len(risky_kill_moves) == 0:
@@ -240,13 +258,16 @@ def choose_move(data: dict) -> str:
         move = random.choice(risky_kill_moves)
       break
         
-    # CHASING TAIL
-    if my_health < 50 or my_length <= get_largest_snake_length(snakes, my_id):
-      move = move_to_coord(possible_moves, my_head, closest_food)
+    if len(kill_moves) > 0:
+      move = random.choice(kill_moves)
     else:
-      move = move_to_coord(possible_moves, my_head, my_body[-1]) 
-      # move = random.choice(possible_moves)
-    print("CURRENT CHOSEN MOVE:" + move)
+      # CHASING TAIL
+      if my_health < 50 or my_length <= get_largest_snake_length(snakes, my_id):
+        move = move_to_coord(possible_moves, my_head, closest_food)
+      else:
+        move = move_to_coord(possible_moves, my_head, my_body[-1]) 
+        # move = random.choice(possible_moves)
+      print("CURRENT CHOSEN MOVE:" + move)
     safe_from_kill = kill_safe(coords_around_move(move, my_head), snakes, my_length)
     ff_value = get_flood_fill_value(move, my_head, board_width, board_height, snakes)
     print("FLOOD FILL VALUE: ", end = "")
