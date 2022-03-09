@@ -23,7 +23,7 @@ def avoid_the_walls(my_head: dict, board_width: int, board_height: int, possible
 
 def is_in_snake(coord: Dict[str, int], snakes: List[dict]) -> boolean:
   for snake in snakes:
-    for i in range(len(snake["body"])):
+    for i in range(snake["length"]):
       if coord == snake["body"][i]:
         return True
   return False
@@ -111,7 +111,7 @@ def kill_safe(coords: List[Dict[str, int]], snakes: List[Dict[str, int]], my_len
   for coord in coords:
     for snake in snakes:
       if snake["body"][0] == coord:#(snake["body"][0]["x"] == (coord["x"]) and snake["body"][0]["y"] == (coord["y"])):
-        if (len(snake["body"]) >= my_length):
+        if (snake["length"] >= my_length):
           # print("SAFE: FALSE")
           return False
   # print("SAFE: TRUE")
@@ -156,67 +156,29 @@ def get_flood_fill_value(move: str, my_head: str, board_width: int, board_height
   
   return flood_fill(x, y, [], 0, board_width, board_height, snakes)
 
-"""def block_safe(coords: List[Dict[str, int]], board_length: int, board_width: int, snakes: List[Dict[str, int]]) -> bool:
-    left_of_move = True
-    right_of_move = True
-    #checks walls
-    if (coords[0]["x"] < 0 or coords[0]["x"] > (board_length - 1) or coords[0]["y"] < 0 or coords[0]["y"] > (board_width - 1)):
-        left_of_move = False
-    
-    if (coords[1]["x"] < 1 or coords[1]["x"] > (board_length - 1)
-            or coords[1]["y"] < 0 or coords[1]["y"] > (board_width - 1)):
-        right_of_move = False
 
-    for snake in snakes:
-        for i in snake["body"]:
-            if coords[0]["x"] == i["x"] and coords[0]["y"] == i["y"]:
-                left_of_move = False
-            if coords[1]["x"] == i["x"] and coords[1]["y"] == i["y"]:
-                right_of_move = False
+def get_largest_snake_length(snakes: List[dict], my_id: str):
+  max_length = 0
 
-    # print(f"LEFT OF MOVE: {left_of_move}")
-    # print(f"RIGHT OF MOVE: {right_of_move}")
-    return left_of_move or right_of_move
-    
+  for snake in snakes:
+    if my_id != snake['id']:
+      current_length = snake['length']
+      if current_length > max_length:
+        max_length = current_length
 
-def blocked_coords(move: str, my_head: Dict[str, int]) -> List[Dict[str, int]]:
-    coords = []
-    if move == "left":
-        next_coord = {"x": my_head["x"] - 1, "y": my_head["y"]}
-        coords.append({"x": next_coord["x"], "y": next_coord["y"] - 1})  #down
-        coords.append({"x": next_coord["x"], "y": next_coord["y"] + 1})  #up
-    elif move == "right":
-        next_coord = {"x": my_head["x"] + 1, "y": my_head["y"]}
-        coords.append({"x": next_coord["x"], "y": next_coord["y"] - 1})  #down
-        coords.append({"x": next_coord["x"], "y": next_coord["y"] + 1})  #up
-    elif move == "up":
-        next_coord = {"x": my_head["x"], "y": my_head["y"] + 1}
-        coords.append({"x": next_coord["x"] - 1, "y": next_coord["y"]})  #left
-        coords.append({"x": next_coord["x"] + 1, "y": next_coord["y"]})  #right
-    elif move == "down":
-        next_coord = {"x": my_head["x"], "y": my_head["y"] - 1}
-        coords.append({"x": next_coord["x"] - 1, "y": next_coord["y"]})  #left
-        coords.append({"x": next_coord["x"] + 1, "y": next_coord["y"]})  #right
-    return coords"""
+  return max_length
 
 
 def choose_move(data: dict) -> str:
-  """
-  data: Dictionary of all Game Board data as received from the Battlesnake Engine.
-  For a full example of "data", see https://docs.battlesnake.com/references/api/sample-move-request
-
-  return: A String, the single move to make. One of "up", "down", "left" or "right".
-
-  Use the information in "data" to decide your next move. The "data" variable can be interacted
-  with as a Python Dictionary, and contains all of the information about the Battlesnake board
-  for each move of the game.
-
-  """
   my_head = data["you"][
     "head"]  # A dictionary of x/y coordinates like {"x": 0, "y": 0}
   my_body = data["you"][
     "body"]  # A list of x/y coordinate dictionaries like [ {"x": 0, "y": 0}, {"x": 1, "y": 0}, {"x": 2, "y": 0} ]
-  my_length = len(my_body)
+  my_length = data["you"]["length"]
+  my_health = data["you"]["health"]
+  my_id = data["you"]["id"]
+  snakes = data["board"]["snakes"]
+
 
   # TODO: uncomment the lines below so you can see what this data looks like in your output!
   # print(f"~~~ Turn: {data["turn"]}  Game Mode: {data["game"]["ruleset"]["name"]} ~~~")
@@ -240,25 +202,25 @@ def choose_move(data: dict) -> str:
   #possible_moves = avoid_my_body(my_head, my_body, possible_moves)
 
   # TODO: Using information from "data", don"t let your Battlesnake pick a move that would collide with another Battlesnake
-  possible_moves = avoid_all_snakes(my_head, data["board"]["snakes"], possible_moves)
+  possible_moves = avoid_all_snakes(my_head, snakes, possible_moves)
 
   # TODO: Using information from "data", make your Battlesnake move towards a piece of food on the board
   closest_food = find_closest_food(my_head, board_width, board_height, data["board"]["food"])
   # print("CLOSEST FOOD: ")
   # print(closest_food)
-
+  
   # CHASING TAIL
-  if data["you"]["health"] < 50 or my_length < 10:
+  if my_health < 50 or my_length <= get_largest_snake_length(snakes, my_id):
     move = move_to_coord(possible_moves, my_head, closest_food)
   else:
     move = move_to_coord(possible_moves, my_head, my_body[-1]) 
     # move = random.choice(possible_moves)
   print("CURRENT CHOSEN MOVE:" + move)
-  
+
   risky_kill_moves = []
-  safe_from_kill = kill_safe(coords_around_move(move, my_head), data["board"]["snakes"], my_length)
+  safe_from_kill = kill_safe(coords_around_move(move, my_head), snakes, my_length)
   risky_block_moves_to_ff_value = {}
-  ff_value = get_flood_fill_value(move, my_head, board_width, board_height, data["board"]["snakes"])
+  ff_value = get_flood_fill_value(move, my_head, board_width, board_height, snakes)
   print("FLOOD FILL VALUE: ", end = "")
   print(ff_value)
   safe_from_block = ff_value >= my_length
@@ -279,14 +241,14 @@ def choose_move(data: dict) -> str:
       break
         
     # CHASING TAIL
-    if data["you"]["health"] < 50 or my_length < 10:
+    if my_health < 50 or my_length <= get_largest_snake_length(snakes, my_id):
       move = move_to_coord(possible_moves, my_head, closest_food)
     else:
       move = move_to_coord(possible_moves, my_head, my_body[-1]) 
       # move = random.choice(possible_moves)
     print("CURRENT CHOSEN MOVE:" + move)
-    safe_from_kill = kill_safe(coords_around_move(move, my_head), data["board"]["snakes"], my_length)
-    ff_value = get_flood_fill_value(move, my_head, board_width, board_height, data["board"]["snakes"])
+    safe_from_kill = kill_safe(coords_around_move(move, my_head), snakes, my_length)
+    ff_value = get_flood_fill_value(move, my_head, board_width, board_height, snakes)
     print("FLOOD FILL VALUE: ", end = "")
     print(ff_value)
     safe_from_block = ff_value >= my_length
