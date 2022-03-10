@@ -166,7 +166,7 @@ def get_largest_snake_length(snakes: List[dict], my_id: str):
       if current_length > max_length:
         max_length = current_length
 
-  return max_length
+  return max_length + 3
 
 
 def prioritize_kill(possible_moves: List[str], snakes: List[dict],my_head:Dict[str, int], my_length:int) -> List[str]:
@@ -226,7 +226,7 @@ def choose_move(data: dict) -> str:
     move = random.choice(kill_moves)
   else:
     # CHASING TAIL
-    if my_health < 50 or my_length <= get_largest_snake_length(snakes, my_id) + 1:
+    if my_health < 50 or my_length <= get_largest_snake_length(snakes, my_id):
       move = move_to_coord(possible_moves, my_head, closest_food)
     else:
       if len(snakes) > 2:
@@ -271,7 +271,7 @@ def choose_move(data: dict) -> str:
       move = random.choice(kill_moves)
     else:
       # CHASING TAIL
-      if my_health < 50 or my_length <= get_largest_snake_length(snakes, my_id) + 1:
+      if my_health < 50 or my_length <= get_largest_snake_length(snakes, my_id):
         move = move_to_coord(possible_moves, my_head, closest_food)
       else:
         if len(snakes) > 2:
