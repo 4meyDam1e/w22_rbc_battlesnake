@@ -254,15 +254,13 @@ def choose_move(data: dict) -> str:
       risky_block_moves_to_ff_value[move] = ff_value
     if not safe_from_kill:
       risky_kill_moves_to_ff_value[move] = ff_value
-      risky_kill_moves.append(move)
+      # risky_kill_moves.append(move)
     possible_moves.remove(move)
     if move in kill_moves:
       kill_moves.remove(move)
 
     if len(possible_moves) == 0:
-      if len(risky_kill_moves) <= 1:
-        if len(risky_kill_moves_to_ff_value) == 1 and len(risky_block_moves_to_ff_value) > 1:
-          risky_block_moves_to_ff_value.remove(risky_kill_moves_to_ff_value[0])
+      if len(risky_kill_moves_to_ff_value) <= 1 and len(risky_block_moves_to_ff_value) > 0:
         move = max(risky_block_moves_to_ff_value, key = risky_block_moves_to_ff_value.get)
       else:
         # move = random.choice(risky_kill_moves)
