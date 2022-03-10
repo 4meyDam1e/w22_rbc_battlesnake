@@ -166,7 +166,7 @@ def get_largest_snake_length(snakes: List[dict], my_id: str):
       if current_length > max_length:
         max_length = current_length
 
-  return max_length + 3
+  return max_length + 2
 
 
 def prioritize_kill(possible_moves: List[str], snakes: List[dict],my_head:Dict[str, int], my_length:int) -> List[str]:
@@ -260,7 +260,7 @@ def choose_move(data: dict) -> str:
       kill_moves.remove(move)
 
     if len(possible_moves) == 0:
-      if len(risky_kill_moves_to_ff_value) <= 1 and len(risky_block_moves_to_ff_value) > 0:
+      if len(risky_kill_moves_to_ff_value) == 0:
         move = max(risky_block_moves_to_ff_value, key = risky_block_moves_to_ff_value.get)
       else:
         # move = random.choice(risky_kill_moves)
