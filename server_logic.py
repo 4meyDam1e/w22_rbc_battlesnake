@@ -30,24 +30,24 @@ def is_in_snake(coord: Dict[str, int], snakes: List[dict]) -> boolean:
 
 
 def avoid_all_snakes(my_head: Dict[str, int], snakes: List[dict], possible_moves: List[str]) -> List[str]:
-  print("-----------------------\nIn avoid_all_snakes()")
+  # print("-----------------------\nIn avoid_all_snakes()")
   if is_in_snake({"x": my_head["x"], "y": my_head["y"] + 1}, snakes): # above my head
     if "up" in possible_moves:
-      print("REMOVING UP")
+      # print("REMOVING UP")
       possible_moves.remove("up")
   if is_in_snake({"x": my_head["x"] - 1, "y": my_head["y"]}, snakes): # left of my head
     if "left" in possible_moves:
-      print("REMOVING LEFT")
+      # print("REMOVING LEFT")
       possible_moves.remove("left")
   if is_in_snake({"x": my_head["x"], "y": my_head["y"] - 1}, snakes): # below my head
     if "down" in possible_moves:
-      print("REMOVING DOWN")
+      # print("REMOVING DOWN")
       possible_moves.remove("down")
   if is_in_snake({"x": my_head["x"] + 1, "y": my_head["y"]}, snakes): # right of my head
     if "right" in possible_moves:
-      print("REMOVING RIGHT")
+      # print("REMOVING RIGHT")
       possible_moves.remove("right")
-  print("------------------")
+  # print("------------------")
   return possible_moves
 
 
@@ -166,7 +166,7 @@ def get_largest_snake_length(snakes: List[dict], my_id: str):
       if current_length > max_length:
         max_length = current_length
 
-  return max_length
+  return max_length + 2
 
 
 def prioritize_kill(possible_moves: List[str], snakes: List[dict],my_head:Dict[str, int], my_length:int) -> List[str]:
@@ -191,8 +191,6 @@ def choose_move(data: dict) -> str:
   my_id = data["you"]["id"]
   snakes = data["board"]["snakes"]
 
-
-  # TODO: uncomment the lines below so you can see what this data looks like in your output!
   # print(f"~~~ Turn: {data["turn"]}  Game Mode: {data["game"]["ruleset"]["name"]} ~~~")
   # print(f"All board data this turn: {data}")
   print("----------------------")
@@ -201,22 +199,14 @@ def choose_move(data: dict) -> str:
 
   possible_moves = ["up", "down", "left", "right"]
 
-  # Don"t allow your Battlesnake to move back in on it"s own neck
-  #possible_moves = avoid_my_neck(my_head, my_body, possible_moves)
-
-  # TODO: Using information from "data", find the edges of the board and don"t let your Battlesnake move beyond them
   board_width = data["board"]["width"]
   board_height = data["board"]["height"]
   possible_moves = avoid_the_walls(my_head, board_width, board_height,
                                     possible_moves)
 
-  # TODO Using information from "data", don"t let your Battlesnake pick a move that would hit its own body
-  #possible_moves = avoid_my_body(my_head, my_body, possible_moves)
 
-  # TODO: Using information from "data", don"t let your Battlesnake pick a move that would collide with another Battlesnake
   possible_moves = avoid_all_snakes(my_head, snakes, possible_moves)
 
-  # TODO: Using information from "data", make your Battlesnake move towards a piece of food on the board
   closest_food = find_closest_food(my_head, board_width, board_height, data["board"]["food"])
   # print("CLOSEST FOOD: ")
   # print(closest_food)
@@ -229,13 +219,19 @@ def choose_move(data: dict) -> str:
     if my_health < 50 or my_length <= get_largest_snake_length(snakes, my_id):
       move = move_to_coord(possible_moves, my_head, closest_food)
     else:
-      move = move_to_coord(possible_moves, my_head, my_body[-1]) 
-      # move = random.choice(possible_moves)
+      if len(snakes) > 2:
+        move = move_to_coord(possible_moves, my_head, my_body[-1]) 
+      else:
+        for snake in snakes:
+          if snake["id"] != my_id:
+            move = move_to_coord(possible_moves, my_head, snake["body"][0])
     print("CURRENT CHOSEN MOVE:" + move)
 
-  risky_kill_moves = []
+  
   safe_from_kill = kill_safe(coords_around_move(move, my_head), snakes, my_length)
   risky_block_moves_to_ff_value = {}
+  risky_kill_moves_to_ff_value = {}
+
   ff_value = get_flood_fill_value(move, my_head, board_width, board_height, snakes)
   print("FLOOD FILL VALUE: ", end = "")
   print(ff_value)
@@ -246,16 +242,16 @@ def choose_move(data: dict) -> str:
     if not safe_from_block:
       risky_block_moves_to_ff_value[move] = ff_value
     if not safe_from_kill:
-      risky_kill_moves.append(move)
+      risky_kill_moves_to_ff_value[move] = ff_value
     possible_moves.remove(move)
     if move in kill_moves:
       kill_moves.remove(move)
 
     if len(possible_moves) == 0:
-      if len(risky_kill_moves) == 0:
+      if len(risky_kill_moves_to_ff_value) == 0:
         move = max(risky_block_moves_to_ff_value, key = risky_block_moves_to_ff_value.get)
       else:
-        move = random.choice(risky_kill_moves)
+        move = max(risky_kill_moves_to_ff_value, key = risky_kill_moves_to_ff_value.get)
       break
         
     if len(kill_moves) > 0:
@@ -265,13 +261,17 @@ def choose_move(data: dict) -> str:
       if my_health < 50 or my_length <= get_largest_snake_length(snakes, my_id):
         move = move_to_coord(possible_moves, my_head, closest_food)
       else:
-        move = move_to_coord(possible_moves, my_head, my_body[-1]) 
-        # move = random.choice(possible_moves)
-      print("CURRENT CHOSEN MOVE:" + move)
+        if len(snakes) > 2:
+          move = move_to_coord(possible_moves, my_head, my_body[-1]) 
+        else:
+          for snake in snakes:
+            if snake["id"] != my_id:
+              move = move_to_coord(possible_moves, my_head, snake["body"][0])
+      # print("CURRENT CHOSEN MOVE:" + move)
     safe_from_kill = kill_safe(coords_around_move(move, my_head), snakes, my_length)
     ff_value = get_flood_fill_value(move, my_head, board_width, board_height, snakes)
-    print("FLOOD FILL VALUE: ", end = "")
-    print(ff_value)
+    # print("FLOOD FILL VALUE: ", end = "")
+    # print(ff_value)
     safe_from_block = ff_value >= my_length
     
 
@@ -279,9 +279,6 @@ def choose_move(data: dict) -> str:
   #print("COORDS AROUND MOVE: ")
   #print(coords)
   # TODO: Explore new strategies for picking a move that are better than random
-
-  # if len(possible_moves) == 0:
-  #   move = random.choice(risky_moves)
 
   # print(
   #     f"{data["game"]["id"]} MOVE {data["turn"]}: {move} picked from all valid options in {possible_moves}"
