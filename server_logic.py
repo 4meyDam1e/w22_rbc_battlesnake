@@ -204,6 +204,7 @@ def choose_move(data: dict) -> str:
   possible_moves = avoid_the_walls(my_head, board_width, board_height,
                                     possible_moves)
 
+
   possible_moves = avoid_all_snakes(my_head, snakes, possible_moves)
 
   closest_food = find_closest_food(my_head, board_width, board_height, data["board"]["food"])
@@ -230,6 +231,7 @@ def choose_move(data: dict) -> str:
   safe_from_kill = kill_safe(coords_around_move(move, my_head), snakes, my_length)
   risky_block_moves_to_ff_value = {}
   risky_kill_moves_to_ff_value = {}
+
   ff_value = get_flood_fill_value(move, my_head, board_width, board_height, snakes)
   print("FLOOD FILL VALUE: ", end = "")
   print(ff_value)
@@ -277,6 +279,7 @@ def choose_move(data: dict) -> str:
   #print("COORDS AROUND MOVE: ")
   #print(coords)
   # TODO: Explore new strategies for picking a move that are better than random
+
   # print(
   #     f"{data["game"]["id"]} MOVE {data["turn"]}: {move} picked from all valid options in {possible_moves}"
   # )
